@@ -1,23 +1,26 @@
 from pathlib import Path
 import shutil
 
-carpeta = Path.home() / 'Downloads'
-for archivo in carpeta.iterdir():
-    print(archivo.name, archivo.suffix)
-
-categorias = {
-    '.pdf': 'Documentos',
+mapeo = {
+    '.pdf': 'PDFs',
     '.docx': 'Documentos',
     '.jpeg': 'Imagenes',
-    '.png': 'Imagenes'
+    '.png': 'Imagenes',
 
 }
 
-pdf = Path.home() / 'Downloads' / 'pdf'
-pdf.mkdir(exist_ok=True)
+descargas = Path.home() / 'Downloads'
+for archivo in descargas.iterdir():
+    #print(archivo.name, archivo.suffix)
 
-for archivo in Path('.').glob('*.pdf'):
-    shutil.move(
-        archivo,
-        pdf / archivo.name
-    )
+    if not archivo.is_file():
+        continue
+
+    categorias = mapeo.get(archivo.suffix.lower())
+
+    if categorias:
+        destino = descargas / categorias
+        destino.mkdir(exist_ok=True)
+
+        shutil.move(archivo, destino / archivo.name ) 
+    print(mapeo.get('*.jpg'))

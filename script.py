@@ -1,26 +1,43 @@
 from pathlib import Path
 import shutil
 
-mapeo = {
-    '.pdf': 'PDFs',
-    '.docx': 'Documentos',
-    '.jpeg': 'Imagenes',
-    '.png': 'Imagenes',
+SIMULAR = False   # cámbialo a False cuando todo se vea bien
 
+CATEGORIAS = {
+    '.pdf': 'Documentos',
+    '.docx': 'Documentos',
+    '.jpg': 'Imagenes',
+    '.png': 'Imagenes',
 }
 
-descargas = Path.home() / 'Downloads'
-for archivo in descargas.iterdir():
-    #print(archivo.name, archivo.suffix)
 
-    if not archivo.is_file():
-        continue
+def manejar_duplicados(destino: Path) -> Path:
+    if not destino.exists():
+        return destino
 
-    categorias = mapeo.get(archivo.suffix.lower())
+    contador = 1
+    while True:
+        nueva = destino.with_name(f'{destino.stem}_{contador}{destino.suffix}')
+        if not nueva.exists():
+            return nueva
+        contador += 1
 
-    if categorias:
-        destino = descargas / categorias
-        destino.mkdir(exist_ok=True)
 
-        shutil.move(archivo, destino / archivo.name ) 
-    print(mapeo.get('*.jpg'))
+def organizar(carpeta: Path) -> None:
+    for archivo in carpeta.iterdir():
+        if not archivo.is_file():
+            continue
+
+        categoria = CATEGORIAS.get(archivo.suffix.lower(), 'Otros')
+        carpeta_destino = carpeta / categoria
+        destino = manejar_duplicados(carpeta_destino / archivo.name)
+
+        print(f'{archivo.name} -> {categoria}/{destino.name}')
+
+        if not SIMULAR:
+            carpeta_destino.mkdir(exist_ok=True)
+            shutil.move(archivo, destino)
+
+
+if __name__ == '__main__':
+    organizar(Path.home() / 'Downloads')
